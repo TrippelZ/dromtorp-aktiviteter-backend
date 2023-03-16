@@ -40,12 +40,32 @@ exports.CreateUser = (request, response) => {
         return;
     }
 
+    // Invalid permission level
+    if (typeof permissionLevel !== "number" || permissionLevel < 0 || permissionLevel > 99) {
+        response.status(400).send({"Error": "Ugyldig tillatelsesnivå!"});
+        return;
+    }
+
 
     const verifiedEmail = email.trim().toLowerCase();
     if (await (DBControl.FindUserEmail(verifiedEmail)).length <= 0) {
         response.status(400).send({"Error": `Bruker med epost ${verifiedEmail} eksisterer allerede!`});
         return;
     }
+
+    let salt = crypto.randomBytes(32);
+    let hash;
+    try {
+        salt = salt.toString("utf-8")
+        hash = crypto.scryptSync(password, salt, 256).toString("utf-8");
+    } catch {
+        response.status(500).send({"Error": "Problem ved kryptering av passord!"});
+        return;
+    }
+
+    // Total stored password length of 289 characters
+    const hashedPassword = hash + "$" + salt;
+
 
 }
 
