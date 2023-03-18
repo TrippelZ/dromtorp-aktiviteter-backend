@@ -18,7 +18,7 @@ DBControl.Connect(
 );
 
 app.post("/register", [
-    APIHandler.CreateUser
+    APIHandler.RegisterUser
 ]);
 
 app.get("/user/:userID", [

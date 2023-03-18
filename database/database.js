@@ -16,8 +16,19 @@ exports.Connect = (host, user, password, databaseName) => {
     });
 }
 
-exports.CreateUser = (firstName, lastName, email, password, permissionLevel) => {
+exports.CreateUser = (userInfo) => {
+    const query = "INSERT INTO `users`(`firstName`, `lastName`, `email`, `password`, `permissionLevel`) VALUES (?, ?, ?, ?, ?)";
 
+    return new Promise((resolve) => {
+        database.query(query, userInfo, (error, result) => {
+            if (error) {
+                console.error(error);
+                resolve(false);
+            }
+
+            resolve(result);
+        });
+    });
 }
 
 exports.FindUserID = (id) => {

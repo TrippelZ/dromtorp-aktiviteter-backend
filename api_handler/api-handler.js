@@ -2,7 +2,7 @@ const DBControl  = require("../database/database.js");
 
 const crypto = require("crypto");
 
-exports.CreateUser = (request, response) => {
+exports.CreateUser = async (request, response) => {
     const firstName       = request.body.firstName;
     const lastName        = request.body.lastName;
     const email           = request.body.email;
@@ -10,6 +10,11 @@ exports.CreateUser = (request, response) => {
     const permissionLevel = request.body.permissionLevel || 0;
 
 
+    if (request.body.constructor === Object && Object.keys(request.body).length === 0) {
+        response.status(400).send({"Error": "Ingen data for å opprette konto!"});
+        return;
+    }
+    
     // Invalid first name
     if (typeof firstName !== "string" || !firstName || firstName == "") {
         response.status(400).send({"Error": "Ugyldig fornavn!"});
@@ -48,7 +53,7 @@ exports.CreateUser = (request, response) => {
 
 
     const verifiedEmail = email.trim().toLowerCase();
-    if (await (DBControl.FindUserEmail(verifiedEmail)).length <= 0) {
+    if ((await DBControl.FindUserEmail(verifiedEmail)).length > 0) {
         response.status(400).send({"Error": `Bruker med epost ${verifiedEmail} eksisterer allerede!`});
         return;
     }
@@ -56,8 +61,8 @@ exports.CreateUser = (request, response) => {
     let salt = crypto.randomBytes(32);
     let hash;
     try {
-        salt = salt.toString("utf-8")
-        hash = crypto.scryptSync(password, salt, 256).toString("utf-8");
+        salt = salt.toString("hex")
+        hash = crypto.scryptSync(password, salt, 256).toString("hex");
     } catch {
         response.status(500).send({"Error": "Problem ved kryptering av passord!"});
         return;
@@ -66,7 +71,21 @@ exports.CreateUser = (request, response) => {
     // Total stored password length of 289 characters
     const hashedPassword = hash + "$" + salt;
 
+    const createdUser = await DBControl.CreateUser([firstName, lastName, verifiedEmail, hashedPassword, permissionLevel]);
 
+    //console.log(createdUser);
+
+    if (!createdUser) {
+        response.status(502).send({"Error": "Problem ved opprettelse av konto!"});
+        return;
+    }
+
+    response.status(201).send({"userId": createdUser.insertId});
+}
+
+exports.RegisterUser = async (request, response) => {
+    request.body.permissionLevel = 1;
+    exports.CreateUser(request, response);
 }
 
 exports.FindUserID = async (request, response) => {
