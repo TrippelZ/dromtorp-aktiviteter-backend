@@ -132,3 +132,53 @@ exports.FindUserEmail = async (request, response) => {
     
     response.status(200).send(foundUser[0]);
 }
+
+exports.ValidateLogin = async (request, response) => {
+    let enteredEmail    = request.body.email;
+    let enteredPassword = request.body.password;
+
+    // Invalid email
+    if (typeof email !== "string" || !email || email == "") {
+        response.status(400).send({"Error": "Ugyldig epost adresse!"});
+        return;
+    }
+
+    // Invalid password
+    if (typeof password !== "string" || !password || password == "") {
+        response.status(400).send({"Error": "Ugyldig passord!"});
+        return;
+    }
+
+    enteredEmail = enteredEmail.trim().toLowerCase();
+    const user   = await DBControl.FindUserEmail(enteredEmail);
+
+    if (user.Error) {
+        response.status(502).send({"Error": user.Error});
+        return;
+    }
+
+    if (user.length <= 0) {
+        response.status(200).send({"Error": `Bruker med epost ${enteredEmail} eksisterer ikke!`});
+        return;
+    }
+
+
+    const userInfo       = await DBControl.GetFullUserInfo(user[0].userID);
+    const passwordSalt   = userInfo[0].password.split("$");
+    const hashedPassword = passwordSalt[0];
+    const salt           = passwordSalt[1];
+
+    try {
+        enteredPassword = crypto.scryptSync(enteredPassword, salt, 256).toString("hex");
+    } catch {
+        response.status(500).send({"Error": "Problem ved validering av passord!"});
+        return;
+    }
+
+    if (enteredPassword !== hashedPassword) {
+        response.status(401).send({"Error": "Ugyldig passord!"});
+        return;
+    }
+
+    
+}

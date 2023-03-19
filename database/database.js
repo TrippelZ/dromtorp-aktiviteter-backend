@@ -62,3 +62,21 @@ exports.FindUserEmail = (email) => {
         });
     });
 }
+
+exports.GetFullUserInfo = (userID) => {
+    if (!userID || typeof userID !== "number") {
+        return {Error: "Missing valid user ID!"};
+    }
+
+    const query = "SELECT * FROM `users` WHERE `userID`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [userID], (error, result) => {
+            if (error) {
+                resolve({Error: error});
+            }
+            
+            resolve(result);
+        });
+    });
+}
