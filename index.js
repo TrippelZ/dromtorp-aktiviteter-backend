@@ -29,6 +29,10 @@ app.post("/user", [
     APIHandler.FindUserEmail
 ]);
 
+app.post("/validate", [
+    APIHandler.ValidateLogin
+]);
+
 app.listen(Config.PORT, () => {
     console.log(`App listening on port ${Config.PORT}!`);
 });

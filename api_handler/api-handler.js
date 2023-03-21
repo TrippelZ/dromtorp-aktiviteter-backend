@@ -1,6 +1,7 @@
 const DBControl  = require("../database/database.js");
 
 const crypto = require("crypto");
+const jwt    = require("jsonwebtoken");
 
 exports.CreateUser = async (request, response) => {
     const firstName       = request.body.firstName;
@@ -61,14 +62,14 @@ exports.CreateUser = async (request, response) => {
     let salt = crypto.randomBytes(32);
     let hash;
     try {
-        salt = salt.toString("hex")
-        hash = crypto.scryptSync(password, salt, 256).toString("hex");
+        salt = salt.toString("base64");
+        hash = crypto.scryptSync(password, salt, 256).toString("base64");
     } catch {
         response.status(500).send({"Error": "Problem ved kryptering av passord!"});
         return;
     }
 
-    // Total stored password length of 289 characters
+    // Total stored password length of 389 characters
     const hashedPassword = hash + "$" + salt;
 
     const createdUser = await DBControl.CreateUser([firstName, lastName, verifiedEmail, hashedPassword, permissionLevel]);
@@ -138,13 +139,13 @@ exports.ValidateLogin = async (request, response) => {
     let enteredPassword = request.body.password;
 
     // Invalid email
-    if (typeof email !== "string" || !email || email == "") {
+    if (typeof enteredEmail !== "string" || !enteredEmail || enteredEmail == "") {
         response.status(400).send({"Error": "Ugyldig epost adresse!"});
         return;
     }
 
     // Invalid password
-    if (typeof password !== "string" || !password || password == "") {
+    if (typeof enteredPassword !== "string" || !enteredPassword || enteredPassword == "") {
         response.status(400).send({"Error": "Ugyldig passord!"});
         return;
     }
@@ -169,7 +170,7 @@ exports.ValidateLogin = async (request, response) => {
     const salt           = passwordSalt[1];
 
     try {
-        enteredPassword = crypto.scryptSync(enteredPassword, salt, 256).toString("hex");
+        enteredPassword = crypto.scryptSync(enteredPassword, salt, 256).toString("base64");
     } catch {
         response.status(500).send({"Error": "Problem ved validering av passord!"});
         return;
@@ -180,5 +181,14 @@ exports.ValidateLogin = async (request, response) => {
         return;
     }
 
-    
+    const token = jwt.sign(
+        {
+            userID   : userInfo[0].userID,
+            email    : userInfo[0].email,
+            password : userInfo[0].password
+        },
+        
+    );
+
+    response.status(200).send({"userId": userInfo[0].userID});
 }

@@ -11,5 +11,7 @@
         "USER"    : 1,
         "TEACHER" : 2,
         "ADMIN"   : 3
-    }
+    },
+
+    "JWT_Secret_Key" : ""
 }
