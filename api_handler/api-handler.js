@@ -1,4 +1,5 @@
-const DBControl  = require("../database/database.js");
+const Tokens    = require("../tokens.json");
+const DBControl = require("../database/database.js");
 
 const crypto = require("crypto");
 const jwt    = require("jsonwebtoken");
@@ -183,12 +184,24 @@ exports.ValidateLogin = async (request, response) => {
 
     const token = jwt.sign(
         {
-            userID   : userInfo[0].userID,
-            email    : userInfo[0].email,
-            password : userInfo[0].password
+            userID: userInfo[0].userID
         },
-        
+        Tokens.JWT_Secret,
+        {expiresIn: "1h"}
     );
 
-    response.status(200).send({"userId": userInfo[0].userID});
+    response.status(200).send({"authToken": token});
+}
+
+exports.ValidateToken = (request, response, next) => {
+    const token = request.body.authToken || request.query.authToken;
+
+    jwt.verify(token, Tokens.JWT_Secret, (error, decoded) => {
+        if (error) {
+            response.status(400).send({"Error": "Ugyldig sesjon!"});
+            return;
+        }
+
+        next();
+    });
 }
