@@ -3,12 +3,14 @@ const Config = require("./config.json");
 const DBControl  = require("./database/database.js");
 const APIHandler = require("./api_handler/api-handler.js");
 
-const express = require("express");
-const cors    = require("cors");
+const express      = require("express");
+const cors         = require("cors");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 DBControl.Connect(
     Config.Database_Host,
