@@ -198,6 +198,8 @@ exports.ValidateToken = (request, response, next) => {
 
     jwt.verify(token, Tokens.JWT_Secret, (error, decoded) => {
         if (error) {
+            //Todo: fjern feil token.
+            //response.clearCookie("")
             response.status(400).send({"Error": "Ugyldig sesjon!"});
             return;
         }
