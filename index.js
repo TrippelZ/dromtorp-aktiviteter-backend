@@ -1,4 +1,5 @@
-const Config = require("./config.json");
+const Config  = require("./config.json");
+const DBLogin = require("./db-login.json");
 
 const DBControl  = require("./database/database.js");
 const APIHandler = require("./api_handler/api-handler.js");
@@ -13,10 +14,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 DBControl.Connect(
-    Config.Database_Host,
-    Config.Database_User,
-    Config.Database_Password,
-    Config.Database_Name
+    DBLogin.Database_Host,
+    DBLogin.Database_User,
+    DBLogin.Database_Password,
+    DBLogin.Database_Name
 );
 
 app.post("/register", [
