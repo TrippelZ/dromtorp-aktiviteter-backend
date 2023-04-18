@@ -80,3 +80,21 @@ exports.GetFullUserInfo = (userID) => {
         });
     });
 }
+
+exports.UpdateUserLoginTime = (userID, loginTime) => {
+    if (!userID || typeof userID !== "number") {
+        return {Error: "Missing valid user ID!"};
+    }
+
+    const query = "UPDATE `users` SET `loginTime`=? WHERE `userID`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [loginTime, userID], (error, result) => {
+            if (error) {
+                resolve({Error: error});
+            }
+            
+            resolve(result);
+        });
+    });
+}
