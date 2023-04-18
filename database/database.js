@@ -81,6 +81,24 @@ exports.GetFullUserInfo = (userID) => {
     });
 }
 
+exports.GetUserLoginTime = (userID) => {
+    if (!userID || typeof userID !== "number") {
+        return {Error: "Ugyldig bruker ID!"};
+    }
+
+    const query = "SELECT `loginTime` FROM `users` WHERE `userID`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [userID], (error, result) => {
+            if (error) {
+                resolve({Error: error});
+            }
+            
+            resolve(result);
+        });
+    });
+}
+
 exports.UpdateUserLoginTime = (userID, loginTime) => {
     if (!userID || typeof userID !== "number") {
         return {Error: "Missing valid user ID!"};
