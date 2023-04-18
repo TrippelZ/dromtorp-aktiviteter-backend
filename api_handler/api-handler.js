@@ -112,7 +112,30 @@ exports.RegisterUser = async (request, response) => {
         return;
     }
 
+    const foundUser = await DBControl.FindUserID(newUserID.userID);
 
+    if (foundUser.Error || foundUser.length <= 0) {
+        console.log(foundUser.Error);
+        response.status(201).end();
+        return;
+    }
+
+    const newUser = foundUser[0];
+
+    const loginTime = Date.now().toString();
+
+    DBControl.UpdateUserLoginTime(newUser.userID, loginTime);
+    
+    const token = GenerateJWT(newUser.userID, loginTime);
+
+    response.cookie("authorization", token, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+        maxAge: 24 * 60 * 60
+    });
+
+    response.status(201).end();
 }
 
 exports.FindUserID = async (request, response) => {
