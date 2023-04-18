@@ -68,7 +68,7 @@ async function CreateUser(firstName, lastName, email, password, permissionLevel)
     const createdUser = await DBControl.CreateUser([firstName, lastName, verifiedEmail, hashedPassword, permissionLevel]);
 
     if (!createdUser) {
-        return {StatusCode: 502, Error: "Problem ved opprettelse av konto!"};
+        return {StatusCode: 500, Error: "Problem ved opprettelse av konto!"};
     }
 
     return {StatusCode: 201, userID: createdUser.insertId};
@@ -93,7 +93,7 @@ exports.CreateUser = async (request, response) => {
         return;
     }
 
-    response.status(newUserID.StatusCode).send({"UserID": newUserID.userID});
+    response.status(newUserID.StatusCode).send({"userId": newUserID.userID});
 }
 
 exports.RegisterUser = async (request, response) => {
@@ -135,7 +135,12 @@ exports.RegisterUser = async (request, response) => {
         maxAge: 24 * 60 * 60
     });
 
-    response.status(201).end();
+    response.cookie("userId", newUser.userID, {
+        sameSite: "none",
+        maxAge: 24 * 60 * 60 * 30
+    });
+
+    response.status(201).send({"userId": newUser.userID});
 }
 
 exports.FindUserID = async (request, response) => {
@@ -149,7 +154,7 @@ exports.FindUserID = async (request, response) => {
 
     if (foundUser.Error) {
         console.log(foundUser.Error);
-        response.status(502).send({"Error": foundUser.Error});
+        response.status(500).send({"Error": foundUser.Error});
         return;
     }
 
@@ -171,7 +176,7 @@ exports.FindUserEmail = async (request, response) => {
     const foundUser = await DBControl.FindUserEmail(email);
 
     if (foundUser.Error) {
-        response.status(502).send({"Error": foundUser.Error});
+        response.status(500).send({"Error": foundUser.Error});
         return;
     }
 
@@ -203,7 +208,7 @@ exports.ValidateLogin = async (request, response) => {
     const user   = await DBControl.FindUserEmail(enteredEmail);
 
     if (user.Error) {
-        response.status(502).send({"Error": user.Error});
+        response.status(500).send({"Error": user.Error});
         return;
     }
 
@@ -243,19 +248,40 @@ exports.ValidateLogin = async (request, response) => {
         maxAge: 24 * 60 * 60
     });
 
-    response.status(200).send({"Status": true});
+    response.cookie("userId", userInfo[0].userID, {
+        sameSite: "none",
+        maxAge: 24 * 60 * 60 * 30
+    });
+
+    response.status(200).send({"userId": userInfo[0].userID});
 }
 
-exports.ValidateToken = (request, response, next) => {
-    const token = request.body.authToken || request.query.authToken;
+exports.ValidateToken = async (request, response, next) => {
+    const token  = request.cookies.authorization;
+    const userID = request.cookies.userId;
 
-    jwt.verify(token, Tokens.JWT_Secret, (error, decoded) => {
+    if (!token || !userID) {
+        response.status(400).send({"Error": "Ugyldig sesjon!"});
+        return;
+    }
+
+    const loginTime = await DBControl.GetUserLoginTime(userID);
+
+    if (loginTime.Error || loginTime.length <= 0) {
+        response.clearCookie("authorization");
+        response.clearCookie("userId");
+        response.status(500).send({"Error": "Problemer med verifisering av konto."});
+        return;
+    }
+
+    jwt.verify(token, Tokens.JWT_Secret + loginTime.loginTime, (error, decoded) => {
         if (error) {
             response.clearCookie("authorization");
+            response.clearCookie("userId");
             response.status(400).send({"Error": "Ugyldig sesjon!"});
             return;
         }
-
-        next();
     });
+
+    next();
 }
