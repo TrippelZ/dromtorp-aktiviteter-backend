@@ -4,60 +4,53 @@ const DBControl = require("../database/database.js");
 const crypto = require("crypto");
 const jwt    = require("jsonwebtoken");
 
-exports.CreateUser = async (request, response) => {
-    const firstName       = request.body.firstName;
-    const lastName        = request.body.lastName;
-    const email           = request.body.email;
-    const password        = request.body.password;
-    const permissionLevel = request.body.permissionLevel || 0;
+function GenerateJWT(userID, loginTime) {
+    return jwt.sign(
+        {
+            userID: userID
+        },
+        Tokens.JWT_Secret + loginTime,
+        {expiresIn: "1d"}
+    );
+}
 
+async function CreateUser(firstName, lastName, email, password, permissionLevel) {
+    permissionLevel = permissionLevel || 0;
 
-    if (request.body.constructor === Object && Object.keys(request.body).length === 0) {
-        response.status(400).send({"Error": "Ingen data for å opprette konto!"});
-        return;
-    }
-    
     // Invalid first name
     if (typeof firstName !== "string" || !firstName || firstName == "") {
-        response.status(400).send({"Error": "Ugyldig fornavn!"});
-        return;
+        return {StatusCode: 400, Error: "Ugyldig fornavn!"};
     }
 
     // Invalid last name
     if (typeof lastName !== "string" || !lastName || lastName == "") {
-        response.status(400).send({"Error": "Ugyldig etternavn!"});
-        return;
+        return {StatusCode: 400, Error: "Ugyldig etternavn!"};
     }
 
     // Invalid email
     if (typeof email !== "string" || !email || email == "") {
-        response.status(400).send({"Error": "Ugyldig epost adresse!"});
-        return;
+        return {StatusCode: 400, Error: "Ugyldig epost adresse!"};
     }
 
     // Invalid password
     if (typeof password !== "string" || !password || password == "") {
-        response.status(400).send({"Error": "Ugyldig passord!"});
-        return;
+        return {StatusCode: 400, Error: "Ugyldig passord!"};
     }
 
     // Not viken email
     if (/@viken.no\s*$/.test(email.trim().toLowerCase()) == false) {
-        response.status(400).send({"Error": "Bruk @viken.no epost!"});
-        return;
+        return {StatusCode: 400, Error: "Bruk @viken.no epost!"};
     }
 
     // Invalid permission level
     if (typeof permissionLevel !== "number" || permissionLevel < 0 || permissionLevel > 99) {
-        response.status(400).send({"Error": "Ugyldig tillatelsesnivå!"});
-        return;
+        return {StatusCode: 400, Error: "Ugyldig tillatelsesnivå!"};
     }
 
 
     const verifiedEmail = email.trim().toLowerCase();
     if ((await DBControl.FindUserEmail(verifiedEmail)).length > 0) {
-        response.status(400).send({"Error": `Bruker med epost ${verifiedEmail} eksisterer allerede!`});
-        return;
+        return {StatusCode: 400, Error: `Bruker med epost ${verifiedEmail} eksisterer allerede!`};
     }
 
     let salt = crypto.randomBytes(32);
@@ -66,8 +59,7 @@ exports.CreateUser = async (request, response) => {
         salt = salt.toString("base64");
         hash = crypto.scryptSync(password, salt, 256).toString("base64");
     } catch {
-        response.status(500).send({"Error": "Problem ved kryptering av passord!"});
-        return;
+        return {StatusCode: 500, Error: "Problem ved kryptering av passord!"};
     }
 
     // Total stored password length of 389 characters
@@ -75,19 +67,52 @@ exports.CreateUser = async (request, response) => {
 
     const createdUser = await DBControl.CreateUser([firstName, lastName, verifiedEmail, hashedPassword, permissionLevel]);
 
-    //console.log(createdUser);
-
     if (!createdUser) {
-        response.status(502).send({"Error": "Problem ved opprettelse av konto!"});
+        return {StatusCode: 502, Error: "Problem ved opprettelse av konto!"};
+    }
+
+    return {StatusCode: 201, userID: createdUser.insertId};
+}
+
+exports.CreateUser = async (request, response) => {
+    if (request.body.constructor === Object && Object.keys(request.body).length === 0) {
+        response.status(400).send({"Error": "Ingen data for å opprette konto!"});
+        return;
+    }
+    
+    const newUserID = await CreateUser(
+        request.body.firstName,
+        request.body.lastName,
+        request.body.email,
+        request.body.password,
+        request.body.permissionLevel
+    );
+
+    if (newUserID.Error) {
+        response.status(newUserID.StatusCode).send({"Error": newUserID.Error});
         return;
     }
 
-    response.status(201).send({"userId": createdUser.insertId});
+    response.status(newUserID.StatusCode).send({"UserID": newUserID.userID});
 }
 
 exports.RegisterUser = async (request, response) => {
     request.body.permissionLevel = 1;
-    exports.CreateUser(request, response);
+    
+    const newUserID = await CreateUser(
+        request.body.firstName,
+        request.body.lastName,
+        request.body.email,
+        request.body.password,
+        request.body.permissionLevel
+    );
+
+    if (newUserID.Error) {
+        response.status(newUserID.StatusCode).send({"Error": newUserID.Error});
+        return;
+    }
+
+
 }
 
 exports.FindUserID = async (request, response) => {
@@ -182,15 +207,20 @@ exports.ValidateLogin = async (request, response) => {
         return;
     }
 
-    const token = jwt.sign(
-        {
-            userID: userInfo[0].userID
-        },
-        Tokens.JWT_Secret,
-        {expiresIn: "1h"}
-    );
+    const loginTime = Date.now().toString();
 
-    response.status(200).send({"authToken": token});
+    DBControl.UpdateUserLoginTime(userInfo[0].userID, loginTime);
+    
+    const token = GenerateJWT(userInfo[0].userID, loginTime);
+
+    response.cookie("authorization", token, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+        maxAge: 24 * 60 * 60
+    });
+
+    response.status(200).send({"Status": true});
 }
 
 exports.ValidateToken = (request, response, next) => {
@@ -198,8 +228,7 @@ exports.ValidateToken = (request, response, next) => {
 
     jwt.verify(token, Tokens.JWT_Secret, (error, decoded) => {
         if (error) {
-            //Todo: fjern feil token.
-            //response.clearCookie("")
+            response.clearCookie("authorization");
             response.status(400).send({"Error": "Ugyldig sesjon!"});
             return;
         }
