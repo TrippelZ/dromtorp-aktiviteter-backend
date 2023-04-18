@@ -1,9 +1,4 @@
 {
-    "Database_Host"     : "localhost",
-    "Database_User"     : "root",
-    "Database_Password" : "",
-    "Database_Name"     : "dromtorp_aktiviteter",
-
     "PORT" : 3001,
 
     "Permission" : {
