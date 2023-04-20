@@ -71,7 +71,7 @@ async function CreateUser(firstName, lastName, email, password, permissionLevel)
         return {StatusCode: 500, Error: "Problem ved opprettelse av konto!"};
     }
 
-    return {StatusCode: 201, userID: createdUser.insertId};
+    return {StatusCode: 201, userID: createdUser};
 }
 
 exports.CreateUser = async (request, response) => {
@@ -132,12 +132,12 @@ exports.RegisterUser = async (request, response) => {
         httpOnly: true,
         sameSite: "none",
         secure: true,
-        maxAge: 24 * 60 * 60
+        maxAge: 24 * 60 * 60 * 30
     });
 
     response.cookie("userId", newUser.userID, {
         sameSite: "none",
-        maxAge: 24 * 60 * 60 * 30
+        maxAge: 24 * 60 * 60 * 60
     });
 
     response.status(201).send({"userId": newUser.userID});
@@ -245,12 +245,12 @@ exports.ValidateLogin = async (request, response) => {
         httpOnly: true,
         sameSite: "none",
         secure: true,
-        maxAge: 24 * 60 * 60
+        maxAge: 24 * 60 * 60 * 30
     });
 
     response.cookie("userId", userInfo[0].userID, {
         sameSite: "none",
-        maxAge: 24 * 60 * 60 * 30
+        maxAge: 24 * 60 * 60 * 60
     });
 
     response.status(200).send({"userId": userInfo[0].userID});
