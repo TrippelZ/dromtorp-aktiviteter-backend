@@ -26,7 +26,52 @@ exports.CreateUser = (userInfo) => {
                 resolve(false);
             }
 
-            resolve(result);
+            resolve(result.insertId);
+        });
+    });
+}
+
+exports.UpdateUserInfo = (userID, firstName, lastName) => {
+    const query = "UPDATE `users` SET `firstName`=?, `lastName`=? WHERE `userID`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [firstName, lastName, userID], (error) => {
+            if (error) {
+                console.error(error);
+                resolve(false);
+            }
+
+            resolve(true);
+        });
+    });
+}
+
+exports.UpdateUserMail = (userID, email) => {
+    const query = "UPDATE `users` SET `email`=? WHERE `userID`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [email, userID], (error) => {
+            if (error) {
+                console.error(error);
+                resolve(false);
+            }
+
+            resolve(true);
+        });
+    });
+}
+
+exports.UpdateUserPassword = (userID, password) => {
+    const query = "UPDATE `users` SET `password`=? WHERE `userID`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [password, userID], (error) => {
+            if (error) {
+                console.error(error);
+                resolve(false);
+            }
+
+            resolve(true);
         });
     });
 }
@@ -113,6 +158,81 @@ exports.UpdateUserLoginTime = (userID, loginTime) => {
             }
             
             resolve(result);
+        });
+    });
+}
+
+exports.CreateActivity = (activityName, activityDescription, activityDate, activityHost) => {
+    const query = "INSERT INTO `activities`(`activityName`, `activityDescription`, `activityDate`, `activityHost`) VALUES (?, ?, ?, ?)";
+
+    return new Promise((resolve) => {
+        database.query(query, [activityName, activityDescription, activityDate, activityHost], (error, result) => {
+            if (error) {
+                console.error(error);
+                resolve(false);
+            }
+
+            resolve(result.insertId);
+        });
+    });
+}
+
+exports.UpdateActivity = (activityID, activityName, activityDescription, activityDate, activityHost) => {
+    const query = "UPDATE `activities` SET `activityName`=?, `activityDescription`=?, `activityDate`=?, `activityHost`=? WHERE `activityID`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [activityName, activityDescription, activityDate, activityHost, activityID], (error, result) => {
+            if (error) {
+                console.error(error);
+                resolve(false);
+            }
+
+            resolve(result.insertId);
+        });
+    });
+}
+
+exports.DeleteActivity = (activityID) => {
+    const query = "DELETE FROM `activities` WHERE `activityID`=?"
+
+    return new Promise((resolve) => {
+        database.query(query, [activityID], (error, result) => {
+            if (error) {
+                console.error(error);
+                resolve(false);
+            }
+
+            resolve(true);
+        });
+    });
+}
+
+exports.ActivitySignup = (activityID, userID) => {
+    const query = "INSERT INTO `activity_signups`(`activity`, `user`) VALUES (?, ?)";
+
+    return new Promise((resolve) => {
+        database.query(query, [activityID, userID], (error) => {
+            if (error) {
+                console.error(error);
+                resolve(false);
+            }
+
+            resolve(true);
+        });
+    });
+}
+
+exports.ActivityQuit = (activityID, userID) => {
+    const query = "DELETE FROM `activity_signups` WHERE `activity`=? AND `user`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [activityID, userID], (error) => {
+            if (error) {
+                console.error(error);
+                resolve(false);
+            }
+
+            resolve(true);
         });
     });
 }
