@@ -2,19 +2,20 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
+
 CREATE TABLE `activities` (
   `activityID` bigint(255) NOT NULL,
   `activityName` varchar(1024) NOT NULL,
   `activityDescription` varchar(2048) NOT NULL,
   `activityDate` datetime NOT NULL,
   `activityHost` bigint(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `activity_signups` (
   `signupID` bigint(255) NOT NULL,
   `activity` bigint(255) NOT NULL,
   `user` bigint(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `users` (
   `userID` bigint(255) NOT NULL,
@@ -24,10 +25,11 @@ CREATE TABLE `users` (
   `password` varchar(389) NOT NULL,
   `permissionLevel` tinyint(2) NOT NULL,
   `loginTime` varchar(99) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 ALTER TABLE `activities`
-  ADD PRIMARY KEY (`activityID`);
+  ADD PRIMARY KEY (`activityID`),
+  ADD KEY `host_FK` (`activityHost`);
 
 ALTER TABLE `activity_signups`
   ADD PRIMARY KEY (`signupID`),
@@ -45,6 +47,9 @@ ALTER TABLE `activity_signups`
 
 ALTER TABLE `users`
   MODIFY `userID` bigint(255) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `activities`
+  ADD CONSTRAINT `host_FK` FOREIGN KEY (`activityHost`) REFERENCES `users` (`userID`);
 
 ALTER TABLE `activity_signups`
   ADD CONSTRAINT `activity_FK` FOREIGN KEY (`activity`) REFERENCES `activities` (`activityID`),
