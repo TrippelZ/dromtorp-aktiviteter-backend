@@ -177,26 +177,99 @@ exports.CreateActivity = (activityName, activityDescription, activityDate, activ
     });
 }
 
-exports.UpdateActivity = (activityID, activityName, activityDescription, activityDate, activityHost) => {
-    const query = "UPDATE `activities` SET `activityName`=?, `activityDescription`=?, `activityDate`=?, `activityHost`=? WHERE `activityID`=?";
+exports.UpdateActivityName = (activityID, activityName) => {
+    const query = "UPDATE `activities` SET `activityName`=? WHERE `activityID`=?";
 
     return new Promise((resolve) => {
-        database.query(query, [activityName, activityDescription, activityDate, activityHost, activityID], (error, result) => {
+        database.query(query, [activityName, activityID], (error) => {
             if (error) {
                 console.error(error);
                 resolve(false);
             }
 
-            resolve(result.insertId);
+            resolve(true);
+        });
+    });
+}
+
+exports.UpdateActivityDescription = (activityID, activityDescription) => {
+    const query = "UPDATE `activities` SET `activityDescription`=? WHERE `activityID`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [activityDescription, activityID], (error) => {
+            if (error) {
+                console.error(error);
+                resolve(false);
+            }
+
+            resolve(true);
+        });
+    });
+}
+
+exports.UpdateActivityDate = (activityID, activityDate) => {
+    const query = "UPDATE `activities` SET `activityDate`=? WHERE `activityID`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [activityDate, activityID], (error) => {
+            if (error) {
+                console.error(error);
+                resolve(false);
+            }
+
+            resolve(true);
+        });
+    });
+}
+
+exports.UpdateActivityHost = (activityID, activityHost) => {
+    const query = "UPDATE `activities` SET `activityHost`=? WHERE `activityID`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [activityHost, activityID], (error) => {
+            if (error) {
+                console.error(error);
+                resolve(false);
+            }
+
+            resolve(true);
+        });
+    });
+}
+
+exports.GetActivityById = (activityID) => {
+    const query = "SELECT `activityID`, `activityName`, `activityDescription`, `activityDate`, `activityHost` FROM `activities` WHERE `activityID`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [activityID], (error, result) => {
+            if (error) {
+                resolve({Error: error});
+            }
+
+            resolve(result);
+        });
+    });
+}
+
+exports.GetAllActivities = () => {
+    const query = "SELECT `activityID`, `activityName`, `activityDescription`, `activityDate`, `activityHost` FROM `activities`";
+
+    return new Promise((resolve) => {
+        database.query(query, (error, result) => {
+            if (error) {
+                resolve({Error: error});
+            }
+
+            resolve(result);
         });
     });
 }
 
 exports.DeleteActivity = (activityID) => {
-    const query = "DELETE FROM `activities` WHERE `activityID`=?"
+    const query = "DELETE FROM `activity_signups` WHERE `activity`=?; DELETE FROM `activities` WHERE `activityID`=?"
 
     return new Promise((resolve) => {
-        database.query(query, [activityID], (error, result) => {
+        database.query(query, [activityID, activityID], (error) => {
             if (error) {
                 console.error(error);
                 resolve(false);
