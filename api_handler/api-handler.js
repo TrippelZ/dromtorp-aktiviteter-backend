@@ -1,3 +1,4 @@
+const Config    = require("../config.json");
 const Tokens    = require("../tokens.json");
 const DBControl = require("../database/database.js");
 
@@ -73,6 +74,18 @@ async function CreateUser(firstName, lastName, email, password, permissionLevel)
 
     return {StatusCode: 201, userID: createdUser};
 }
+
+async function HasPermission(userID, permissionLevel) {
+    const userInfo = await DBControl.FindUserID(userID);
+
+    if (userInfo.Error) return false;
+
+    if (userInfo[0].permissionLevel < permissionLevel) return false;
+
+    return true;
+}
+
+exports.HasPermission = HasPermission;
 
 exports.CreateUser = async (request, response) => {
     if (request.body.constructor === Object && Object.keys(request.body).length === 0) {
@@ -261,7 +274,7 @@ exports.ValidateToken = async (request, response, next) => {
     const userID = request.cookies.userId;
 
     if (!token || !userID) {
-        response.status(400).send({"Error": "Ugyldig sesjon!"});
+        response.status(401).send({"Error": "Ugyldig sesjon!"});
         return;
     }
 
@@ -278,10 +291,125 @@ exports.ValidateToken = async (request, response, next) => {
         if (error) {
             response.clearCookie("authorization");
             response.clearCookie("userId");
-            response.status(400).send({"Error": "Ugyldig sesjon!"});
+            response.status(401).send({"Error": "Ugyldig sesjon!"});
             return;
         }
     });
 
     next();
+}
+
+exports.ActivityJoin = async (request, response) => {
+    let   activityID = request.params.activityID;
+    const userID     = request.cookies.userId;
+
+    if (!activityID) {
+        response.status(400).send({"Error": "Mangler aktivitet ID!"});
+        return;
+    }
+
+    activityID = parseInt(activityID);
+
+    if (isNaN(activityID)) {
+        response.status(400).send({"Error": "Ugyldig aktivitet ID!"});
+        return;
+    }
+
+    if (!HasPermission(userID, Config.Permission.USER)) {
+        response.status(403).send({"Error": "Mangler tilgang!"});
+        return;
+    }
+
+    const activity = await DBControl.GetActivityById(activityID);
+
+    if (activity.Error) {
+        response.status(500).send({"Error": "Problemer ved verifisering av aktivitet!"});
+        return;
+    }
+
+    if (activity.length <= 0) {
+        response.status(404).send({"Error": "Aktivitet eksisterer ikke!"});
+        return;
+    }
+
+    const status = await DBControl.ActivitySignup(activityID, userID);
+
+    if (!status) {
+        response.status(500).send({"Error": "Problemer ved påmelding!"});
+        return;
+    }
+
+    response.status(200).send({"Status": true});
+}
+
+exports.ActivityQuit = async (request, response) => {
+    let   activityID = request.params.activityID;
+    const userID     = request.cookies.userId;
+
+    if (!activityID) {
+        response.status(400).send({"Error": "Mangler aktivitet ID!"});
+        return;
+    }
+
+    activityID = parseInt(activityID);
+
+    if (isNaN(activityID)) {
+        response.status(400).send({"Error": "Ugyldig aktivitet ID!"});
+        return;
+    }
+
+    if (!HasPermission(Config.Permission.USER)) {
+        response.status(403).send({"Error": "Mangler tilgang!"});
+        return;
+    }
+
+    const activity = await DBControl.GetActivityById(activityID);
+
+    if (activity.Error) {
+        response.status(500).send({"Error": "Problemer ved verifisering av aktivitet!"});
+        return;
+    }
+
+    if (activity.length <= 0) {
+        response.status(404).send({"Error": "Aktivitet eksisterer ikke!"});
+        return;
+    }
+
+    const status = await DBControl.ActivityQuit(activityID, userID);
+
+    if (!status) {
+        response.status(500).send({"Error": "Problemer ved avmelding!"});
+        return;
+    }
+
+    response.status(200).send({"Status": true});
+}
+
+exports.CreateActivity = async (request, response) => {
+    const activityName        = request.body.activityName;
+    const activityDescription = request.body.activityDescription;
+    const activityDate        = request.body.activityDate;
+    const activityHost        = request.body.activityHost;
+
+    if (typeof activityName !== "string" || !activityName || activityName == "") {
+        response.status(400).send({"Error": "Ugyldig aktivitets navn!"});
+        return;
+    }
+
+    if (typeof activityDescription !== "string" || !activityDescription || activityDescription == "") {
+        response.status(400).send({"Error": "Ugyldig aktivitets beskrivelse!"});
+        return;
+    }
+
+    if (typeof activityDate !== "number" || !activityDate || activityDate < Date.now()) {
+        response.status(400).send({"Error": "Ugyldig aktivitets dato!"});
+        return;
+    }
+
+    if (typeof activityHost !== "number" || !activityHost || activityHost == 0) {
+        response.status(400).send({"Error": "Ugyldig aktivitets holder!"});
+        return;
+    }
+
+
 }
