@@ -6,7 +6,7 @@ CREATE TABLE `activities` (
   `activityID` bigint(255) NOT NULL,
   `activityName` varchar(1024) NOT NULL,
   `activityDescription` varchar(2048) NOT NULL,
-  `activityDate` datetime NOT NULL,
+  `activityDate` bigint(255) NOT NULL,
   `activityHost` bigint(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
