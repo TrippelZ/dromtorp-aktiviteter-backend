@@ -70,6 +70,7 @@ app.get("/user/:userID", [
 
 // Get user info by email
 app.post("/user", [
+    APIHandler.ValidateToken,
     APIHandler.FindUserEmail
 ]);
 
