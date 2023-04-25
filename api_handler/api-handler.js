@@ -393,10 +393,13 @@ exports.ActivityQuit = async (request, response) => {
 }
 
 exports.CreateActivity = async (request, response) => {
+    const userID = request.cookies.userId;
+
     const activityName        = request.body.activityName;
     const activityDescription = request.body.activityDescription;
     const activityDate        = request.body.activityDate;
     const activityHost        = request.body.activityHost;
+
 
     if (typeof activityName !== "string" || !activityName || activityName == "") {
         response.status(400).send({"Error": "Ugyldig aktivitets navn!"});
@@ -419,4 +422,17 @@ exports.CreateActivity = async (request, response) => {
     }
 
 
+    if (!HasPermission(userID, Config.Permission.TEACHER)) {
+        response.status(403).send({"Error": "Mangler tilgang!"});
+        return;
+    }
+
+    const newActivityID = await DBControl.CreateActivity(activityName, activityDescription, activityDate, activityHost);
+
+    if (!newActivityID) {
+        response.status(500).send({"Error": "Problemer ved opprettelse av aktivitet!"});
+        return;
+    }
+
+    response.status(201).send({"activityId": newActivityID});
 }

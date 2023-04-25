@@ -105,7 +105,8 @@ app.post("/validate", [
 
 // Create a new activity
 app.post("/activity", [
-    APIHandler.ValidateToken
+    APIHandler.ValidateToken,
+    APIHandler.CreateActivity
 ]);
 
 // Get info about a specific activity
