@@ -115,6 +115,12 @@ app.get("/activity/:activityID", [
     APIHandler.GetActivityById
 ]);
 
+// Get all activities
+app.get("/activity", [
+    APIHandler.ValidateToken,
+    APIHandler.GetAllActivities
+]);
+
 // Update a specific activity's name
 app.patch("/activity/:activityID/name", [
     APIHandler.ValidateToken

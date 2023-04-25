@@ -461,3 +461,27 @@ exports.GetActivityById = async (request, response) => {
 
     response.status(200).send(activity[0]);
 }
+
+exports.GetAllActivities = async (request, response) => {
+    const userID = request.cookies.userId;
+
+    if (!HasPermission(userID, Config.Permission.USER)) {
+        response.status(403).send({"Error": "Mangler tilgang!"});
+        return;
+    }
+
+    const activities = await DBControl.GetAllActivities();
+
+    if (activities.Error) {
+        console.log(foundUser.Error);
+        response.status(500).send({"Error": "Problemer ved å finne aktiviteter!"});
+        return;
+    }
+
+    if (activities.length <= 0) {
+        response.status(200).end();
+        return;
+    }
+
+    response.status(200).json(activities);
+}
