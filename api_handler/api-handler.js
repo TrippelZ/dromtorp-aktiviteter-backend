@@ -176,7 +176,7 @@ exports.FindUserID = async (request, response) => {
         return;
     }
 
-    response.status(200).send(foundUser[0]);
+    response.status(200).json(foundUser[0]);
 }
 
 exports.FindUserEmail = async (request, response) => {
@@ -205,7 +205,7 @@ exports.FindUserEmail = async (request, response) => {
         return;
     }
     
-    response.status(200).send(foundUser[0]);
+    response.status(200).json(foundUser[0]);
 }
 
 exports.ValidateLogin = async (request, response) => {
@@ -464,7 +464,7 @@ exports.GetActivityById = async (request, response) => {
         return;
     }
 
-    response.status(200).send(activity[0]);
+    response.status(200).json(activity[0]);
 }
 
 exports.GetAllActivities = async (request, response) => {
