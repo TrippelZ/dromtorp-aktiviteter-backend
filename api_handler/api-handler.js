@@ -180,9 +180,16 @@ exports.FindUserID = async (request, response) => {
 }
 
 exports.FindUserEmail = async (request, response) => {
+    const userID = request.cookies.userId;
+
     const email = request.body.email;
     if (!email || email == "") {
         response.status(400).send({"Error": "Mangler epost!"});
+        return;
+    }
+
+    if (!HasPermission(userID, Config.Permission.TEACHER)) {
+        response.status(403).send({"Error": "Mangler tilgang!"});
         return;
     }
 
@@ -358,7 +365,7 @@ exports.ActivityQuit = async (request, response) => {
         return;
     }
 
-    if (!HasPermission(Config.Permission.USER)) {
+    if (!HasPermission(userID, Config.Permission.USER)) {
         response.status(403).send({"Error": "Mangler tilgang!"});
         return;
     }
