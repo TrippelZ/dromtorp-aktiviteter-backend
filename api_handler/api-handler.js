@@ -436,3 +436,28 @@ exports.CreateActivity = async (request, response) => {
 
     response.status(201).send({"activityId": newActivityID});
 }
+
+exports.GetActivityById = async (request, response) => {
+    const userID     = request.cookies.userId;
+    const activityID = request.body.activityName;
+
+    if (!activityID) {
+        response.status(400).send({"Error": "Mangler aktivitets ID!"});
+        return;
+    }
+
+    const activity = await DBControl.GetActivityById(activityID);
+
+    if (activity.Error) {
+        console.log(foundUser.Error);
+        response.status(500).send({"Error": "Problemer ved å finne aktivitet!"});
+        return;
+    }
+
+    if (activity.length <= 0) {
+        response.status(200).end();
+        return;
+    }
+
+    response.status(200).send(activity[0]);
+}

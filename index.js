@@ -111,7 +111,8 @@ app.post("/activity", [
 
 // Get info about a specific activity
 app.get("/activity/:activityID", [
-
+    APIHandler.ValidateToken,
+    APIHandler.GetActivityById
 ]);
 
 // Update a specific activity's name
