@@ -172,7 +172,7 @@ exports.FindUserID = async (request, response) => {
     }
 
     if (foundUser.length <= 0) {
-        response.status(200).send({});
+        response.status(200).end();
         return;
     }
 
@@ -201,7 +201,7 @@ exports.FindUserEmail = async (request, response) => {
     }
 
     if (foundUser.length <= 0) {
-        response.status(200).send({});
+        response.status(200).end();
         return;
     }
     
