@@ -9,26 +9,43 @@ const cors         = require("cors");
 const rateLimit    = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 
+
 const standardLimit = rateLimit({
     windowMs        : 1 * 60 * 1000,
     standardHeaders : true,
     legacyHeaders   : false,
-    message         : "For mange forespørsler! Vent en time og prøv igjen!",
+    message         : "For mange forespørsler! Prøv igjen senere!",
     max             : async (request) => {
         const hasPermission = await APIHandler.HasPermission(request.cookies.userId, Config.Permission.TEACHER);
 
         if (hasPermission) return 0;
 
-        return 1_000;
-    },
+        return 120;
+    }
 });
 
-// TODO: make signup limit and activity join/leave limit.
+const signupLimit = rateLimit({
+    windowMs        : 30 * 60 * 1000,
+    standardHeaders : true,
+    legacyHeaders   : false,
+    message         : "For mange forespørsler! Prøv igjen senere!",
+    max             : 50
+});
+
+const activityLimit = rateLimit({
+    windowMs        : 1 * 60 * 1000,
+    standardHeaders : true,
+    legacyHeaders   : false,
+    message         : "For mange forespørsler! Prøv igjen senere!",
+    max             : 60
+}); 
+
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
+app.use(standardLimit);
 
 
 DBControl.Connect(
@@ -42,6 +59,7 @@ DBControl.Connect(
 
 // User signup
 app.post("/register", [
+    signupLimit,
     APIHandler.RegisterUser
 ]);
 
@@ -57,12 +75,14 @@ app.post("/user", [
 
 // Join a specific activity
 app.post("/user/:activityID/join", [
+    activityLimit,
     APIHandler.ValidateToken,
     APIHandler.ActivityJoin
 ]);
 
 // Leave a specific activity
 app.delete("/user/:activityID/quit", [
+    activityLimit,
     APIHandler.ValidateToken,
     APIHandler.ActivityQuit
 ]);
