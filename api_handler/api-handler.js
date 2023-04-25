@@ -446,6 +446,11 @@ exports.GetActivityById = async (request, response) => {
         return;
     }
 
+    if (!HasPermission(userID, Config.Permission.USER)) {
+        response.status(403).send({"Error": "Mangler tilgang!"});
+        return;
+    }
+
     const activity = await DBControl.GetActivityById(activityID);
 
     if (activity.Error) {
