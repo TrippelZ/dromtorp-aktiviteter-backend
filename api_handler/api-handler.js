@@ -526,7 +526,7 @@ exports.UpdateActivityName = async (request, response) => {
     const status = await DBControl.UpdateActivityName(activityID, activityName);
 
     if (!status) {
-        response.status(500).send({"Error": "Problemer ved avmelding!"});
+        response.status(500).send({"Error": "Problemer ved oppdatering av aktivitet!"});
         return;
     }
 
