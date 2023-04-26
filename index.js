@@ -32,6 +32,14 @@ const signupLimit = rateLimit({
     max             : 50
 });
 
+const loginLimit = rateLimit({
+    windowMs        : 10 * 60 * 1000,
+    standardHeaders : true,
+    legacyHeaders   : false,
+    message         : "For mange forespørsler! Prøv igjen senere!",
+    max             : 25
+});
+
 const activityLimit = rateLimit({
     windowMs        : 1 * 60 * 1000,
     standardHeaders : true,
@@ -89,6 +97,7 @@ app.delete("/user/:activityID/quit", [
 ]);
 
 app.post("/login", [
+    loginLimit,
     APIHandler.ValidateLogin
 ]);
 
