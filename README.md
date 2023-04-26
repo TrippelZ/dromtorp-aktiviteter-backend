@@ -51,3 +51,8 @@ MySQL baby!!!! (╯°□°）╯︵ ┻━┻
 Yeah no, one would obviously need the database to use any of this. ┳━┳ ノ( ゜-゜ノ)
 
 [Here is the database SQL.](./database.sql) Just import it or whatever. Just run it and it should make the database.
+
+## Frontend code?
+You can find the [frontend right here](https://github.com/TrippelZ/dromtorp-aktiviteter-frontend)! ☜(ﾟヮﾟ☜)
+
+Same license! Same code quality!
