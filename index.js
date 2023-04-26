@@ -135,7 +135,8 @@ app.patch("/activity/:activityID/description", [
 
 // Update a specific activity's date
 app.patch("/activity/:activityID/date", [
-    APIHandler.ValidateToken
+    APIHandler.ValidateToken,
+    APIHandler.UpdateActivityDate
 ]);
 
 // Update a specific activity's host

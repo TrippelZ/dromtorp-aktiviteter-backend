@@ -574,3 +574,45 @@ exports.UpdateActivityDescription = async (request, response) => {
 
     response.status(200).end();
 }
+
+exports.UpdateActivityDate = async (request, response) => {
+    const userID       = request.cookies.userId;
+    const activityDate = request.body.activityDate;
+    let   activityID   = request.params.activityID;
+
+    if (!activityID) {
+        response.status(400).send({"Error": "Mangler aktivitet ID!"});
+        return;
+    }
+
+    activityID = parseInt(activityID);
+
+    if (isNaN(activityID)) {
+        response.status(400).send({"Error": "Ugyldig aktivitet ID!"});
+        return;
+    }
+
+    if (!activityDate) {
+        response.status(400).send({"Error": "Mangler aktivitets dato!"});
+        return;
+    }
+
+    if (typeof activityDate !== "number" || activityDate < Date.now()) {
+        response.status(400).send({"Error": "Ugyldig aktivitets dato!"});
+        return;
+    }
+
+    if (!HasPermission(userID, Config.Permission.TEACHER)) {
+        response.status(403).send({"Error": "Mangler tilgang!"});
+        return;
+    }
+
+    const status = await DBControl.UpdateActivityDate(activityID, activityDate);
+
+    if (!status) {
+        response.status(500).send({"Error": "Problemer ved oppdatering av aktivetet!"});
+        return;
+    }
+
+    response.status(200).end();
+}
