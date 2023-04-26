@@ -658,3 +658,34 @@ exports.UpdateActivityHost = async (request, response) => {
 
     response.status(200).end();
 }
+
+exports.DeleteActivity = async (request, response) => {
+    const userID       = request.cookies.userId;
+    let   activityID   = request.params.activityID;
+
+    if (!activityID) {
+        response.status(400).send({"Error": "Mangler aktivitet ID!"});
+        return;
+    }
+
+    activityID = parseInt(activityID);
+
+    if (isNaN(activityID)) {
+        response.status(400).send({"Error": "Ugyldig aktivitet ID!"});
+        return;
+    }
+
+    if (!HasPermission(userID, Config.Permission.TEACHER)) {
+        response.status(403).send({"Error": "Mangler tilgang!"});
+        return;
+    }
+
+    const status = await DBControl.DeleteActivity(activityID);
+
+    if (!status) {
+        response.status(500).send({"Error": "Problemer ved sletting av aktivetet!"});
+        return;
+    }
+
+    response.status(200).end();
+}

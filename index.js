@@ -147,7 +147,8 @@ app.patch("/activity/:activityID/host", [
 
 // Delete a specific activity
 app.delete("/activity/:activityID", [
-    APIHandler.ValidateToken
+    APIHandler.ValidateToken,
+    APIHandler.DeleteActivity
 ]);
 
 
