@@ -123,7 +123,8 @@ app.get("/activity", [
 
 // Update a specific activity's name
 app.patch("/activity/:activityID/name", [
-    APIHandler.ValidateToken
+    APIHandler.ValidateToken,
+    APIHandler.UpdateActivityName
 ]);
 
 // Update a specific activity's description

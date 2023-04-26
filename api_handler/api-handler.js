@@ -490,3 +490,45 @@ exports.GetAllActivities = async (request, response) => {
 
     response.status(200).json(activities);
 }
+
+exports.UpdateActivityName = async (request, response) => {
+    const userID       = request.cookies.userId;
+    const activityName = request.body.activityName;
+    let   activityID   = request.params.activityID;
+
+    if (!activityID) {
+        response.status(400).send({"Error": "Mangler aktivitet ID!"});
+        return;
+    }
+
+    activityID = parseInt(activityID);
+
+    if (isNaN(activityID)) {
+        response.status(400).send({"Error": "Ugyldig aktivitet ID!"});
+        return;
+    }
+
+    if (!activityName) {
+        response.status(400).send({"Error": "Mangler aktivitets navn!"});
+        return;
+    }
+
+    if (typeof activityName !== "string" || activityName == "") {
+        response.status(400).send({"Error": "Ugyldig aktivitets navn!"});
+        return;
+    }
+
+    if (!HasPermission(userID, Config.Permission.TEACHER)) {
+        response.status(403).send({"Error": "Mangler tilgang!"});
+        return;
+    }
+
+    const status = await DBControl.UpdateActivityName(activityID, activityName);
+
+    if (!status) {
+        response.status(500).send({"Error": "Problemer ved avmelding!"});
+        return;
+    }
+
+    response.status(200).end();
+}
