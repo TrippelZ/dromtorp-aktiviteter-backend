@@ -129,7 +129,8 @@ app.patch("/activity/:activityID/name", [
 
 // Update a specific activity's description
 app.patch("/activity/:activityID/description", [
-    APIHandler.ValidateToken
+    APIHandler.ValidateToken,
+    APIHandler.UpdateActivityDescription
 ]);
 
 // Update a specific activity's date

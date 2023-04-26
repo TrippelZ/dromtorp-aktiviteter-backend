@@ -532,3 +532,45 @@ exports.UpdateActivityName = async (request, response) => {
 
     response.status(200).end();
 }
+
+exports.UpdateActivityDescription = async (request, response) => {
+    const userID              = request.cookies.userId;
+    const activityDescription = request.body.activityDescription;
+    let   activityID          = request.params.activityID;
+
+    if (!activityID) {
+        response.status(400).send({"Error": "Mangler aktivitet ID!"});
+        return;
+    }
+
+    activityID = parseInt(activityID);
+
+    if (isNaN(activityID)) {
+        response.status(400).send({"Error": "Ugyldig aktivitet ID!"});
+        return;
+    }
+
+    if (!activityDescription) {
+        response.status(400).send({"Error": "Mangler aktivitets beskrivelse!"});
+        return;
+    }
+
+    if (typeof activityDescription !== "string" || activityDescription == "") {
+        response.status(400).send({"Error": "Ugyldig aktivitets beskrivelse!"});
+        return;
+    }
+
+    if (!HasPermission(userID, Config.Permission.TEACHER)) {
+        response.status(403).send({"Error": "Mangler tilgang!"});
+        return;
+    }
+
+    const status = await DBControl.UpdateActivityDescription(activityID, activityDescription);
+
+    if (!status) {
+        response.status(500).send({"Error": "Problemer ved oppdatering av aktivetet!"});
+        return;
+    }
+
+    response.status(200).end();
+}
