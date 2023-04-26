@@ -346,7 +346,7 @@ exports.ActivityJoin = async (request, response) => {
         return;
     }
 
-    response.status(200).send({"Status": true});
+    response.status(200).end();
 }
 
 exports.ActivityQuit = async (request, response) => {
@@ -389,7 +389,7 @@ exports.ActivityQuit = async (request, response) => {
         return;
     }
 
-    response.status(200).send({"Status": true});
+    response.status(200).end();
 }
 
 exports.CreateActivity = async (request, response) => {
