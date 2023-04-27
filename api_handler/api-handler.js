@@ -306,6 +306,10 @@ exports.ValidateToken = async (request, response, next) => {
     next();
 }
 
+exports.TokenIsValid = (request, response) => {
+    response.status(200).send({"userId": userID});
+}
+
 exports.ActivityJoin = async (request, response) => {
     let   activityID = request.params.activityID;
     const userID     = request.cookies.userId;

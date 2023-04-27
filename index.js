@@ -107,7 +107,8 @@ app.post("/login", [
 
 // Validate a users token
 app.post("/validate", [
-    APIHandler.ValidateToken
+    APIHandler.ValidateToken,
+    APIHandler.TokenIsValid
 ]);
 
 
