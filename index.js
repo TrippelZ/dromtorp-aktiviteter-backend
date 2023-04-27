@@ -73,6 +73,7 @@ app.post("/register", [
 
 // Get basic info about a specific user through their ID
 app.get("/user/:userID", [
+    APIHandler.ValidateToken,
     APIHandler.FindUserID
 ]);
 
