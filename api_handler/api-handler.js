@@ -145,12 +145,12 @@ exports.RegisterUser = async (request, response) => {
         httpOnly: true,
         sameSite: "none",
         secure: true,
-        maxAge: 24 * 60 * 60 * 30
+        expire: new Date(Date.now() + (24 * 60 * 60 * 30 * 1000))
     });
 
     response.cookie("userId", newUser.userID, {
         sameSite: "none",
-        maxAge: 24 * 60 * 60 * 60
+        expire: new Date(Date.now() + (24 * 60 * 60 * 60 * 1000))
     });
 
     response.status(201).send({"userId": newUser.userID});
@@ -233,7 +233,7 @@ exports.ValidateLogin = async (request, response) => {
     }
 
     if (user.length <= 0) {
-        response.status(200).send({"Error": `Bruker med epost ${enteredEmail} eksisterer ikke!`});
+        response.status(400).send({"Error": `Bruker med epost ${enteredEmail} eksisterer ikke!`});
         return;
     }
 
@@ -265,12 +265,13 @@ exports.ValidateLogin = async (request, response) => {
         httpOnly: true,
         sameSite: "none",
         secure: true,
-        maxAge: 24 * 60 * 60 * 30
+        expire: new Date(Date.now() + (24 * 60 * 60 * 30 * 1000))
     });
 
     response.cookie("userId", userInfo[0].userID, {
         sameSite: "none",
-        maxAge: 24 * 60 * 60 * 60
+        expire: new Date(Date.now() + (24 * 60 * 60 * 60 * 1000)),
+        secure: true
     });
 
     response.status(200).send({"userId": userInfo[0].userID});
