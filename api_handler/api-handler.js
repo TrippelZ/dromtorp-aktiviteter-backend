@@ -145,12 +145,12 @@ exports.RegisterUser = async (request, response) => {
         httpOnly: true,
         sameSite: "none",
         secure: true,
-        expire: new Date(Date.now() + (24 * 60 * 60 * 30 * 1000))
+        maxAge: 24 * 60 * 60 * 30 * 1000
     });
 
     response.cookie("userId", newUser.userID, {
         sameSite: "none",
-        expire: new Date(Date.now() + (24 * 60 * 60 * 60 * 1000))
+        maxAge: 24 * 60 * 60 * 60 * 1000
     });
 
     response.status(201).send({"userId": newUser.userID});
@@ -265,12 +265,12 @@ exports.ValidateLogin = async (request, response) => {
         httpOnly: true,
         sameSite: "none",
         secure: true,
-        expire: new Date(Date.now() + (24 * 60 * 60 * 30 * 1000))
+        maxAge: 24 * 60 * 60 * 30 * 1000
     });
 
     response.cookie("userId", userInfo[0].userID, {
         sameSite: "none",
-        expire: new Date(Date.now() + (24 * 60 * 60 * 60 * 1000)),
+        maxAge: 24 * 60 * 60 * 60 * 1000,
         secure: true
     });
 
@@ -295,20 +295,25 @@ exports.ValidateToken = async (request, response, next) => {
         return;
     }
 
-    jwt.verify(token, Tokens.JWT_Secret + loginTime.loginTime, (error, decoded) => {
+    let verifyError = false;
+
+    jwt.verify(token, Tokens.JWT_Secret + loginTime[0].loginTime, (error, decoded) => {
         if (error) {
             response.clearCookie("authorization");
             response.clearCookie("userId");
             response.status(401).send({"Error": "Ugyldig sesjon!"});
+            verifyError = true;
             return;
         }
     });
+
+    if (verifyError) return;
 
     next();
 }
 
 exports.TokenIsValid = (request, response) => {
-    response.status(200).send({"userId": userID});
+    response.status(200).send({"userId": request.cookies.userId});
 }
 
 exports.ActivityJoin = async (request, response) => {
