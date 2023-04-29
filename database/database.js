@@ -127,10 +127,6 @@ exports.GetFullUserInfo = (userID) => {
 }
 
 exports.GetUserLoginTime = (userID) => {
-    if (!userID || typeof userID !== "number") {
-        return {Error: "Ugyldig bruker ID!"};
-    }
-
     const query = "SELECT `loginTime` FROM `users` WHERE `userID`=?";
 
     return new Promise((resolve) => {
