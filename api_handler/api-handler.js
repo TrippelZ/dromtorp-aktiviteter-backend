@@ -255,7 +255,13 @@ exports.ValidateLogin = async (request, response) => {
         return;
     }
 
-    const loginTime = Date.now().toString();
+    let loginTime = await DBControl.GetUserLoginTime(userInfo[0].userID);
+
+    if (loginTime.Error || loginTime.length <= 0) {
+        loginTime = Date.now().toString();
+    } else {
+        loginTime = loginTime[0].loginTime;
+    }
 
     DBControl.UpdateUserLoginTime(userInfo[0].userID, loginTime);
     
