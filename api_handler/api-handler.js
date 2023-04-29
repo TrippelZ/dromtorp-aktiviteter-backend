@@ -137,7 +137,7 @@ exports.RegisterUser = async (request, response) => {
 
     const loginTime = Date.now().toString();
 
-    DBControl.UpdateUserLoginTime(newUser.userID, loginTime);
+    await DBControl.UpdateUserLoginTime(newUser.userID, loginTime);
     
     const token = GenerateJWT(newUser.userID, loginTime);
 
@@ -150,7 +150,8 @@ exports.RegisterUser = async (request, response) => {
 
     response.cookie("userId", newUser.userID, {
         sameSite: "none",
-        maxAge: 24 * 60 * 60 * 60 * 1000
+        maxAge: 24 * 60 * 60 * 60 * 1000,
+        secure: true
     });
 
     response.status(201).send({"userId": newUser.userID});
@@ -261,9 +262,8 @@ exports.ValidateLogin = async (request, response) => {
         loginTime = Date.now().toString();
     } else {
         loginTime = loginTime[0].loginTime;
+        await DBControl.UpdateUserLoginTime(userInfo[0].userID, loginTime);
     }
-
-    DBControl.UpdateUserLoginTime(userInfo[0].userID, loginTime);
     
     const token = GenerateJWT(userInfo[0].userID, loginTime);
 
