@@ -78,7 +78,7 @@ async function CreateUser(firstName, lastName, email, password, permissionLevel)
 async function HasPermission(userID, permissionLevel) {
     const userInfo = await DBControl.FindUserID(userID);
 
-    if (userInfo.Error) return false;
+    if (userInfo.Error || userInfo.length <= 0) return false;
 
     if (userInfo[0].permissionLevel < permissionLevel) return false;
 
