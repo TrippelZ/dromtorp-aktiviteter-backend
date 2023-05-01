@@ -234,7 +234,7 @@ exports.UpdateActivityHost = (activityID, activityHost) => {
 }
 
 exports.GetActivityById = (activityID) => {
-    const query = "SELECT `activityID`, `activityName`, `activityDescription`, `activityDate`, `activityHost` FROM `activities` WHERE `activityID`=?";
+    const query = "SELECT `activityID`, `activityName`, `activityDescription`, `activityDate`, `activityHost`, `firstName`, `lastName` FROM `activities` INNER JOIN `users` ON `activityHost`=`userID` WHERE `activityID`=?";
 
     return new Promise((resolve) => {
         database.query(query, [activityID], (error, result) => {
@@ -248,7 +248,7 @@ exports.GetActivityById = (activityID) => {
 }
 
 exports.GetAllActivities = () => {
-    const query = "SELECT `activityID`, `activityName`, `activityDescription`, `activityDate`, `activityHost` FROM `activities`";
+    const query = "SELECT `activityID`, `activityName`, `activityDescription`, `activityDate`, `activityHost`, `firstName`, `lastName` FROM `activities` INNER JOIN `users` WHERE `activityHost`=`userID`";
 
     return new Promise((resolve) => {
         database.query(query, (error, result) => {
