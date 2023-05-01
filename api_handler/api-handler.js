@@ -455,7 +455,7 @@ exports.CreateActivity = async (request, response) => {
 
 exports.GetActivityById = async (request, response) => {
     const userID     = request.cookies.userId;
-    const activityID = request.body.activityName;
+    const activityID = request.params.activityID;
 
     if (!activityID) {
         response.status(400).send({"Error": "Mangler aktivitets ID!"});
