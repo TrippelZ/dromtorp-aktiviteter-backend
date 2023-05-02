@@ -239,7 +239,12 @@ exports.ValidateLogin = async (request, response) => {
     }
 
 
-    const userInfo       = await DBControl.GetFullUserInfo(user[0].userID);
+    const userInfo = await DBControl.GetFullUserInfo(user[0].userID);
+    if (userInfo.Error || userInfo.length <= 0) {
+        response.status(500).send({"Error": "Problem ved å finne bruker!"});
+        return;
+    }
+
     const passwordSalt   = userInfo[0].password.split("$");
     const hashedPassword = passwordSalt[0];
     const salt           = passwordSalt[1];
