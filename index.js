@@ -77,6 +77,12 @@ app.get("/user/:userID", [
     APIHandler.FindUserID
 ]);
 
+// Get the users permission level
+app.get("/user/:userID/permissions", [
+    APIHandler.ValidateToken,
+    APIHandler.GetUserPermissionLevel
+]);
+
 // Get user info by email
 app.post("/user", [
     APIHandler.ValidateToken,

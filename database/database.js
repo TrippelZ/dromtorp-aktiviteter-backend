@@ -126,6 +126,20 @@ exports.GetFullUserInfo = (userID) => {
     });
 }
 
+exports.GetUserPermissionLevel = (userID) => {
+    const query = "SELECT `permissionLevel` FROM `users` WHERE `userID`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [userID], (error, result) => {
+            if (error) {
+                resolve({Error: error});
+            }
+            
+            resolve(result[0].permissionLevel);
+        });
+    });
+}
+
 exports.GetUserLoginTime = (userID) => {
     const query = "SELECT `loginTime` FROM `users` WHERE `userID`=?";
 

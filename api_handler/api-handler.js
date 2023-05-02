@@ -327,6 +327,19 @@ exports.TokenIsValid = (request, response) => {
     response.status(200).send({"userId": request.cookies.userId});
 }
 
+exports.GetUserPermissionLevel = async (request, response) => {
+    const userID = request.cookies.userId;
+
+    const permissionLevel = await DBControl.GetUserPermissionLevel(userID);
+    
+    if (!permissionLevel || permissionLevel.Error) {
+        response.status(500).send({"Error": "Problem ved å sjekke tillatelser!"});
+        return;
+    }
+
+    response.status(200).send({"permissionLevel": permissionLevel});
+}
+
 exports.ActivityJoin = async (request, response) => {
     let   activityID = request.params.activityID;
     const userID     = request.cookies.userId;
