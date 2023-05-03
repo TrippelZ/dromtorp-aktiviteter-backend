@@ -289,6 +289,20 @@ exports.GetAllActivities = () => {
     });
 }
 
+exports.GetActivitySignups = (activityID) => {
+    const query = "SELECT `userID`, `activityName`, `firstName`, `lastName` FROM `activity_signups` INNER JOIN `activities` ON `activity`=`activityID` INNER JOIN `users` ON `user`=`userID` WHERE `activity`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [activityID], (error, result) => {
+            if (error) {
+                resolve({Error: error});
+            }
+            
+            resolve(result);
+        });
+    });
+}
+
 exports.DeleteActivity = (activityID) => {
     const query = "DELETE FROM `activity_signups` WHERE `activity`=?; DELETE FROM `activities` WHERE `activityID`=?"
 
