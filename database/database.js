@@ -76,6 +76,21 @@ exports.UpdateUserPassword = (userID, password) => {
     });
 }
 
+exports.DeleteUserAccount = (userID) => {
+    const query = "DELETE FROM `users` WHERE `userID`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [userID], (error) => {
+            if (error) {
+                console.error(error);
+                resolve(false);
+            }
+
+            resolve(true);
+        });
+    });
+}
+
 exports.FindUserID = (id) => {
     if (!id) return {Error: "Missing user ID!"};
 
