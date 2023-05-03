@@ -149,6 +149,13 @@ app.post("/logout", [
     APIHandler.Logout
 ]);
 
+// Delete a user - UNFINISHED, database needs to remove activities related to user!!!
+/*app.delete("/user/:userID", [
+    updateLimit,
+    APIHandler.ValidateToken,
+    APIHandler.DeleteUser
+]);*/
+
 
 /*== VALIDATION API ==*/
 
