@@ -118,7 +118,7 @@ app.patch("/user/:userID/email", [
 ]);
 
 // Update a users password
-app.patch("/user/:userID/email", [
+app.patch("/user/:userID/password", [
     updateLimit,
     APIHandler.ValidateToken,
     APIHandler.UpdateUserPassword
