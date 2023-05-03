@@ -188,6 +188,48 @@ exports.UpdateUserName = async (request, response) => {
     response.status(200).end();
 }
 
+exports.UpdateUserEmail = async (request, response) => {
+    const updaterID = request.cookies.userId;
+
+    const userID = request.params.userID;
+    const email  = request.body.email;
+
+    if (!userID) {
+        response.status(400).send({"Error": "Mangler bruker ID!"});
+        return;
+    }
+
+    const isAdmin = await HasPermission(updaterID, Config.Permission.ADMIN);
+
+    if (updaterID != userID || !isAdmin) {
+        response.status(403).send({"Error": "Mangler tilgang!"});
+        return;
+    }
+
+    if (typeof email !== "string" || !email || email == "") {
+        response.status(400).send({"Error": "Ugyldig epost adresse!"});
+        return;
+    }
+
+    if (/@viken.no\s*$/.test(email.trim().toLowerCase()) == false) {
+        return {StatusCode: 400, Error: "Bruk @viken.no epost!"};
+    }
+
+    const verifiedEmail = email.trim().toLowerCase();
+    if ((await DBControl.FindUserEmail(verifiedEmail)).length > 0) {
+        return {StatusCode: 400, Error: `Bruker med epost ${verifiedEmail} eksisterer allerede!`};
+    }
+
+    const updated = await DBControl.UpdateUserMail(userID, verifiedEmail);
+
+    if (!updated) {
+        response.status(500).send({"Error": "Problemer ved oppdatering!"});
+        return;
+    }
+
+    response.status(200).end();
+}
+
 exports.FindUserID = async (request, response) => {
     const userID = request.params.userID;
     if (!userID) {

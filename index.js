@@ -110,6 +110,13 @@ app.patch("/user/:userID/name", [
     APIHandler.UpdateUserName
 ]);
 
+// Update a users email
+app.patch("/user/:userID/email", [
+    updateLimit,
+    APIHandler.ValidateToken,
+    APIHandler.UpdateUserEmail
+]);
+
 // Join a specific activity
 app.post("/user/:activityID/join", [
     activityLimit,
