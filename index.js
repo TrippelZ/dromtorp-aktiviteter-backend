@@ -95,6 +95,12 @@ app.post("/user", [
     APIHandler.FindUserEmail
 ]);
 
+// Update a users full name
+app.patch("/user/:userID/name", [
+    APIHandler.ValidateToken,
+    APIHandler.UpdateUserName
+]);
+
 // Join a specific activity
 app.post("/user/:activityID/join", [
     activityLimit,

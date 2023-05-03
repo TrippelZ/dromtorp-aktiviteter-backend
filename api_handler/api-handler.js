@@ -157,6 +157,37 @@ exports.RegisterUser = async (request, response) => {
     response.status(201).send({"userId": newUser.userID});
 }
 
+exports.UpdateUserName = async (request, response) => {
+    const userID = request.params.userID;
+    const firstName = request.body.firstName;
+    const lastName  = request.body.lastName;
+
+    if (!userID) {
+        response.status(400).send({"Error": "Mangler bruker ID!"});
+        return;
+    }
+
+    if (typeof firstName !== "string" || !firstName || firstName == "") {
+        response.status(400).send({"Error": "Ugyldig fornavn!"});
+        return;
+    }
+
+    if (typeof lastName !== "string" || !lastName || lastName == "") {
+        response.status(400).send({"Error": "Ugyldig etternavn!"});
+        return;
+    }
+
+
+    const updated = await DBControl.UpdateUserInfo(userID, firstName, lastName);
+
+    if (!updated) {
+        response.status(500).send({"Error": "Problemer ved oppdatering!"});
+        return;
+    }
+
+    response.status(200).end();
+}
+
 exports.FindUserID = async (request, response) => {
     const userID = request.params.userID;
     if (!userID) {
