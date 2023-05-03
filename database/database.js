@@ -140,6 +140,20 @@ exports.GetUserPermissionLevel = (userID) => {
     });
 }
 
+exports.GetUserActivities = (userID) => {
+    const query = "SELECT `activityID`, `activityName`, `firstName`, `lastName` FROM `activity_signups` INNER JOIN `activities` ON `activity`=`activityID` INNER JOIN `users` ON `user`=`userID` WHERE `user`=?";
+
+    return new Promise((resolve) => {
+        database.query(query, [userID], (error, result) => {
+            if (error) {
+                resolve({Error: error});
+            }
+            
+            resolve(result);
+        });
+    });
+}
+
 exports.GetUserLoginTime = (userID) => {
     const query = "SELECT `loginTime` FROM `users` WHERE `userID`=?";
 
