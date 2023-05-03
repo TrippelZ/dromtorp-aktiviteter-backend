@@ -46,7 +46,15 @@ const activityLimit = rateLimit({
     legacyHeaders   : false,
     message         : "For mange forespørsler! Prøv igjen senere!",
     max             : 60
-}); 
+});
+
+const updateLimit = rateLimit({
+    windowMs        : 1 * 60 * 1000,
+    standardHeaders : true,
+    legacyHeaders   : false,
+    message         : "For mange forespørsler! Prøv igjen senere!",
+    max             : 30
+});
 
 
 const app = express();
@@ -97,6 +105,7 @@ app.post("/user", [
 
 // Update a users full name
 app.patch("/user/:userID/name", [
+    updateLimit,
     APIHandler.ValidateToken,
     APIHandler.UpdateUserName
 ]);
