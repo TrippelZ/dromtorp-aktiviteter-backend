@@ -327,6 +327,19 @@ exports.TokenIsValid = (request, response) => {
     response.status(200).send({"userId": request.cookies.userId});
 }
 
+exports.Logout = async (request, response) => {
+    const userID = request.cookies.userId;
+
+    response.clearCookie("authorization");
+    response.clearCookie("userId");
+
+    const loginTime = Date.now().toString();
+
+    await DBControl.UpdateUserLoginTime(userID, loginTime)
+
+    response.status(200).end();
+}
+
 exports.GetUserPermissionLevel = async (request, response) => {
     const userID = request.cookies.userId;
 

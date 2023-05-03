@@ -108,6 +108,12 @@ app.post("/login", [
     APIHandler.ValidateLogin
 ]);
 
+app.post("/logout", [
+    loginLimit,
+    APIHandler.ValidateToken,
+    APIHandler.Logout
+]);
+
 
 /*== VALIDATION API ==*/
 
