@@ -259,7 +259,8 @@ exports.UpdateUserPassword = async (request, response) => {
     }
 
     if (typeof newPassword !== "string" || !newPassword || newPassword == "") {
-        return {StatusCode: 400, Error: "Ugyldig passord!"};
+        response.status(400).send({"Error": "Ugyldig passord!"});
+        return;
     }
 
 
@@ -291,7 +292,8 @@ exports.UpdateUserPassword = async (request, response) => {
     try {
         newPasswordHash = crypto.scryptSync(newPassword, salt, 256).toString("base64");
     } catch {
-        return {StatusCode: 500, Error: "Problem ved kryptering av nytt passord!"};
+        response.status(500).send({"Error": "Problem ved kryptering av nytt passord!"});
+        return;
     }
 
     const newHashedPassword = newPasswordHash + "$" + salt;
