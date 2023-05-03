@@ -354,7 +354,7 @@ exports.GetUserPermissionLevel = async (request, response) => {
 }
 
 exports.GetUserActivities = async (request, response) => {
-    let userID = request.params.userId;
+    let userID = request.params.userID;
 
     if (!userID) {
         response.status(400).send({"Error": "Mangler bruker ID!"});
