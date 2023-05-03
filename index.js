@@ -77,6 +77,12 @@ app.get("/user/:userID", [
     APIHandler.FindUserID
 ]);
 
+// Get get the activities a specific user has joined
+app.get("/user/:userID/activities", [
+    APIHandler.ValidateToken,
+    APIHandler.GetUserActivities
+]);
+
 // Get the users permission level
 app.get("/user/:userID/permissions", [
     APIHandler.ValidateToken,

@@ -353,6 +353,31 @@ exports.GetUserPermissionLevel = async (request, response) => {
     response.status(200).send({"permissionLevel": permissionLevel});
 }
 
+exports.GetUserActivities = async (request, response) => {
+    let userID = request.params.userId;
+
+    if (!userID) {
+        response.status(400).send({"Error": "Mangler bruker ID!"});
+        return;
+    }
+
+    userID = parseInt(userID);
+
+    if (isNaN(userID)) {
+        response.status(400).send({"Error": "Ugyldig bruker ID!"});
+        return;
+    }
+
+    const activities = await DBControl.GetUserActivities(userID);
+
+    if (activities.Error) {
+        response.status(500).send({"Error": "Problem ved å finne aktiviteter!"});
+        return;
+    }
+
+    response.status(200).json(activities);
+}
+
 exports.ActivityJoin = async (request, response) => {
     let   activityID = request.params.activityID;
     const userID     = request.cookies.userId;
