@@ -158,12 +158,21 @@ exports.RegisterUser = async (request, response) => {
 }
 
 exports.UpdateUserName = async (request, response) => {
+    const updaterID = request.cookies.userId;
+    
     const userID = request.params.userID;
     const firstName = request.body.firstName;
     const lastName  = request.body.lastName;
 
     if (!userID) {
         response.status(400).send({"Error": "Mangler bruker ID!"});
+        return;
+    }
+
+    const isAdmin = await HasPermission(updaterID, Config.Permission.ADMIN);
+
+    if (updaterID != userID || !isAdmin) {
+        response.status(403).send({"Error": "Mangler tilgang!"});
         return;
     }
 
