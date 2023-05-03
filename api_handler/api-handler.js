@@ -308,6 +308,64 @@ exports.UpdateUserPassword = async (request, response) => {
     response.status(200).end();
 }
 
+exports.DeleteUser = async (request, response) => {
+    const updaterID = request.cookies.userId;
+
+    const userID   = request.params.userID;
+    const password = request.body.password;
+
+    if (!userID) {
+        response.status(400).send({"Error": "Mangler bruker ID!"});
+        return;
+    }
+
+    const isAdmin = await HasPermission(updaterID, Config.Permission.ADMIN);
+
+    if (updaterID != userID && !isAdmin) {
+        response.status(403).send({"Error": "Mangler tilgang!"});
+        return;
+    }
+
+    if (typeof password !== "string" || !password || password == "") {
+        response.status(400).send({"Error": "Ugyldig passord!"});
+        return;
+    }
+
+
+    const userInfo = await DBControl.GetFullUserInfo(userID);
+    if (userInfo.Error || userInfo.length <= 0) {
+        response.status(500).send({"Error": "Problem ved oppdatering av passord!"});
+        return;
+    }
+
+    const passwordSalt   = userInfo[0].password.split("$");
+    const hashedPassword = passwordSalt[0];
+    const salt           = passwordSalt[1];
+
+    let confirmHash
+
+    try {
+        confirmHash = crypto.scryptSync(password, salt, 256).toString("base64");
+    } catch {
+        response.status(500).send({"Error": "Problem ved validering av passord!"});
+        return;
+    }
+
+    if (confirmHash !== hashedPassword) {
+        response.status(401).send({"Error": "Gammelt passord er ikke gyldig!"});
+        return;
+    }
+
+    const deleted = await DBControl.DeleteUserAccount(userID);
+
+    if (!deleted) {
+        response.status(500).send({"Error": "Problemer ved sletting av konto!"});
+        return;
+    }
+
+    response.status(200).end();
+}
+
 exports.FindUserID = async (request, response) => {
     const userID = request.params.userID;
     if (!userID) {
