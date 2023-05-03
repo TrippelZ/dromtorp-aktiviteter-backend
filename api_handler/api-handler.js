@@ -159,7 +159,7 @@ exports.RegisterUser = async (request, response) => {
 
 exports.UpdateUserName = async (request, response) => {
     const updaterID = request.cookies.userId;
-    
+
     const userID = request.params.userID;
     const firstName = request.body.firstName;
     const lastName  = request.body.lastName;
@@ -230,6 +230,73 @@ exports.UpdateUserEmail = async (request, response) => {
     }
 
     const updated = await DBControl.UpdateUserMail(userID, verifiedEmail);
+
+    if (!updated) {
+        response.status(500).send({"Error": "Problemer ved oppdatering!"});
+        return;
+    }
+
+    response.status(200).end();
+}
+
+exports.UpdateUserPassword = async (request, response) => {
+    const updaterID = request.cookies.userId;
+
+    const userID       = request.params.userID;
+    const oldPassword  = request.body.oldPassword;
+    const newPassword  = request.body.newPassword;
+
+    if (!userID) {
+        response.status(400).send({"Error": "Mangler bruker ID!"});
+        return;
+    }
+
+    const isAdmin = await HasPermission(updaterID, Config.Permission.ADMIN);
+
+    if (updaterID != userID && !isAdmin) {
+        response.status(403).send({"Error": "Mangler tilgang!"});
+        return;
+    }
+
+    if (typeof newPassword !== "string" || !newPassword || newPassword == "") {
+        return {StatusCode: 400, Error: "Ugyldig passord!"};
+    }
+
+
+    const userInfo = await DBControl.GetFullUserInfo(userID);
+    if (userInfo.Error || userInfo.length <= 0) {
+        response.status(500).send({"Error": "Problem ved oppdatering av passord!"});
+        return;
+    }
+
+    const passwordSalt   = userInfo[0].password.split("$");
+    const hashedPassword = passwordSalt[0];
+    const salt           = passwordSalt[1];
+
+    let oldPasswordHashed
+
+    try {
+        oldPasswordHashed = crypto.scryptSync(oldPassword, salt, 256).toString("base64");
+    } catch {
+        response.status(500).send({"Error": "Problem ved validering av gammelt passord!"});
+        return;
+    }
+
+    if (oldPasswordHashed !== hashedPassword && !isAdmin) {
+        response.status(401).send({"Error": "Gammelt passord er ikke gyldig!"});
+        return;
+    }
+
+    let newPasswordHash;
+    try {
+        newPasswordHash = crypto.scryptSync(newPassword, salt, 256).toString("base64");
+    } catch {
+        return {StatusCode: 500, Error: "Problem ved kryptering av nytt passord!"};
+    }
+
+    const newHashedPassword = newPasswordHash + "$" + salt;
+
+    const updated = await DBControl.UpdateUserPassword(userID, newHashedPassword);
 
     if (!updated) {
         response.status(500).send({"Error": "Problemer ved oppdatering!"});
