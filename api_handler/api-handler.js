@@ -305,6 +305,13 @@ exports.UpdateUserPassword = async (request, response) => {
         return;
     }
 
+    response.clearCookie("authorization");
+    response.clearCookie("userId");
+
+    const loginTime = Date.now().toString();
+
+    await DBControl.UpdateUserLoginTime(userID, loginTime);
+
     response.status(200).end();
 }
 
