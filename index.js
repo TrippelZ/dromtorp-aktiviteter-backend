@@ -180,6 +180,12 @@ app.get("/activity/:activityID", [
     APIHandler.GetActivityById
 ]);
 
+// Get the users that have joined a specific activity
+app.get("/activity/:activityID/members", [
+    APIHandler.ValidateToken,
+    APIHandler.GetActivityMembers
+]);
+
 // Get all activities
 app.get("/activity", [
     APIHandler.ValidateToken,
