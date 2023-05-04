@@ -772,6 +772,24 @@ exports.GetAllActivities = async (request, response) => {
     response.status(200).json(activities);
 }
 
+exports.GetActivityMembers = async (request, response) => {
+    const activityID = request.params.activityID;
+
+    if (!activityID) {
+        response.status(400).send({"Error": "Mangler aktivitets ID!"});
+        return;
+    }
+
+    const members = await DBControl.GetActivitySignups(activityID);
+
+    if (members.Error) {
+        response.status(500).send({"Error": "Problem ved å skaffe aktivitets medlemmer!"});
+        return;
+    }
+
+    response.status(200).json(members);
+}
+
 exports.UpdateActivityName = async (request, response) => {
     const userID       = request.cookies.userId;
     const activityName = request.body.activityName;
